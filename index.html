@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Prashant's Smart Study Planner</title>
+  <meta name="description" content="Prashant's personal smart student study planner with task tracking, timers, and progress visualization."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <!-- Animated Background -->
+  <div class="bg-orbs">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+    <div class="orb orb4"></div>
+    <div class="orb orb5"></div>
+    <div class="orb orb6"></div>
+  </div>
+
+  <!-- Grid overlay -->
+  <div class="grid-overlay"></div>
+
+  <!-- Floating shapes -->
+  <div class="floating-shapes" id="floatingShapes"></div>
+
+  <!-- Shooting stars -->
+  <div class="shooting-stars" id="shootingStars"></div>
+
+  <!-- Particles -->
+  <canvas id="particles"></canvas>
+
+  <!-- App Wrapper -->
+  <div class="app-wrapper">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo-icon">📚</div>
+        <div class="header-text">
+          <h1 class="app-title">StudyPlanner<span class="accent">Pro</span></h1>
+          <p class="owner-tag">Prashant's Personal Dashboard</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="date-badge" id="dateBadge"></div>
+        <div class="streak-badge">
+          <span class="streak-fire">🔥</span>
+          <span class="streak-count" id="streakCount">0</span>
+          <span class="streak-label">day streak</span>
+        </div>
+        <!-- Theme Switcher -->
+        <div class="theme-switcher" id="themeSwitcher">
+          <button class="theme-btn active" data-theme="dark"    title="Dark Mode">🌙</button>
+          <button class="theme-btn"        data-theme="green"   title="Green Mode">🌿</button>
+          <button class="theme-btn"        data-theme="pink"    title="Pink Mode">🌸</button>
+          <button class="theme-btn"        data-theme="ocean"   title="Ocean Mode">🌊</button>
+        </div>
+        <!-- Hamburger -->
+        <button class="hamburger" id="hamburger" aria-label="Menu" onclick="toggleMobileMenu()">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </header>
+    <!-- Mobile Nav Drawer -->
+    <div class="mobile-drawer" id="mobileDrawer">
+      <div class="drawer-themes">
+        <span style="font-size:.8rem;color:var(--text-muted);margin-bottom:6px;display:block;">Choose Theme</span>
+        <div style="display:flex;gap:8px;">
+          <button class="theme-btn" data-theme="dark"  onclick="setTheme('dark')">🌙 Dark</button>
+          <button class="theme-btn" data-theme="green" onclick="setTheme('green')">🌿 Green</button>
+          <button class="theme-btn" data-theme="pink"  onclick="setTheme('pink')">🌸 Pink</button>
+          <button class="theme-btn" data-theme="ocean" onclick="setTheme('ocean')">🌊 Ocean</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <section class="stats-bar">
+      <div class="stat-card" id="statTotal">
+        <div class="stat-icon">📋</div>
+        <div class="stat-info">
+          <span class="stat-number" id="totalTasks">0</span>
+          <span class="stat-label">Total Plans</span>
+        </div>
+      </div>
+      <div class="stat-card" id="statDone">
+        <div class="stat-icon">✅</div>
+        <div class="stat-info">
+          <span class="stat-number" id="doneTasks">0</span>
+          <span class="stat-label">Completed</span>
+        </div>
+      </div>
+      <div class="stat-card" id="statPending">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-info">
+          <span class="stat-number" id="pendingTasks">0</span>
+          <span class="stat-label">Pending</span>
+        </div>
+      </div>
+      <div class="stat-card progress-card">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-info">
+          <span class="stat-number" id="progressPercent">0%</span>
+          <span class="stat-label">Progress</span>
+        </div>
+        <div class="mini-progress">
+          <div class="mini-progress-fill" id="miniProgressFill"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Grid -->
+    <div class="main-grid">
+
+      <!-- Left Panel: Add Plan + Focus Timer -->
+      <div class="left-panel">
+
+        <!-- Add Plan Card -->
+        <div class="card add-plan-card">
+          <div class="card-header">
+            <span class="card-icon">➕</span>
+            <h2>Add Study Plan</h2>
+          </div>
+          <form id="planForm" autocomplete="off">
+            <div class="form-group">
+              <label for="subjectInput">Subject / Topic</label>
+              <input type="text" id="subjectInput" placeholder="e.g. Mathematics - Calculus" required />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="dateInput">Study Date</label>
+                <input type="date" id="dateInput" required />
+              </div>
+              <div class="form-group">
+                <label for="timeInput">Time Slot</label>
+                <input type="time" id="timeInput" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="durationInput">Duration (minutes)</label>
+              <input type="number" id="durationInput" placeholder="e.g. 60" min="1" max="480" />
+            </div>
+            <div class="form-group">
+              <label for="prioritySelect">Priority Level</label>
+              <select id="prioritySelect">
+                <option value="high">🔴 High Priority</option>
+                <option value="medium" selected>🟡 Medium Priority</option>
+                <option value="low">🟢 Low Priority</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="notesInput">Notes (optional)</label>
+              <textarea id="notesInput" placeholder="What do you plan to study?..." rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn-primary" id="addPlanBtn">
+              <span class="btn-icon">🚀</span> Add to Planner
+            </button>
+          </form>
+        </div>
+
+        <!-- Pomodoro Focus Timer -->
+        <div class="card timer-card">
+          <div class="card-header">
+            <span class="card-icon">⏱️</span>
+            <h2>Focus Timer</h2>
+          </div>
+          <div class="timer-modes">
+            <button class="mode-btn active" id="pomodoroBtn" onclick="setTimerMode(25,'Pomodoro')">Pomodoro</button>
+            <button class="mode-btn" id="shortBreakBtn" onclick="setTimerMode(5,'Short Break')">Short Break</button>
+            <button class="mode-btn" id="longBreakBtn" onclick="setTimerMode(15,'Long Break')">Long Break</button>
+          </div>
+          <div class="timer-display">
+            <svg class="timer-ring" viewBox="0 0 200 200">
+              <circle class="ring-bg" cx="100" cy="100" r="85"/>
+              <circle class="ring-progress" id="timerRingProgress" cx="100" cy="100" r="85"/>
+            </svg>
+            <div class="timer-center">
+              <div class="timer-mode-label" id="timerModeLabel">Pomodoro</div>
+              <div class="timer-time" id="timerDisplay">25:00</div>
+              <div class="timer-sub">Stay focused!</div>
+            </div>
+          </div>
+          <div class="timer-controls">
+            <button class="timer-btn" id="startTimerBtn" onclick="toggleTimer()">▶ Start</button>
+            <button class="timer-btn secondary" onclick="resetTimer()">↺ Reset</button>
+          </div>
+          <div class="pomodoro-count">
+            <span>🍅 Sessions today: </span><span id="pomodoroCount">0</span>
+          </div>
+        </div>
+
+        <!-- Study Clock & Mini Stats widget -->
+        <div class="card mini-widget-card">
+          <div class="card-header">
+            <span class="card-icon">🕐</span>
+            <h2>Study Clock</h2>
+          </div>
+          <div class="mini-clock" id="miniClock"></div>
+          <div class="mini-widget-row">
+            <div class="mini-widget-item">
+              <span class="mw-icon">📅</span>
+              <span class="mw-label">Today's Plans</span>
+              <span class="mw-val" id="mwToday">0</span>
+            </div>
+            <div class="mini-widget-item">
+              <span class="mw-icon">✅</span>
+              <span class="mw-label">Done Today</span>
+              <span class="mw-val" id="mwDone">0</span>
+            </div>
+            <div class="mini-widget-item">
+              <span class="mw-icon">🍅</span>
+              <span class="mw-label">Pomodoros</span>
+              <span class="mw-val" id="mwPomo">0</span>
+            </div>
+          </div>
+          <div class="mini-tip" id="miniTip"></div>
+        </div>
+
+      </div>
+
+      <!-- Right Panel: Plans List -->
+      <div class="right-panel">
+        <div class="card plans-card">
+          <div class="card-header">
+            <span class="card-icon">📅</span>
+            <h2>My Study Plans</h2>
+            <div class="header-actions">
+              <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search plans..."/>
+              <select id="filterSelect" class="filter-select">
+                <option value="all">All</option>
+                <option value="pending">Pending</option>
+                <option value="completed">Completed</option>
+                <option value="high">High Priority</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+              <button class="btn-danger-sm" onclick="clearCompleted()" title="Clear completed">🗑 Completed</button>
+            </div>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="overall-progress">
+            <div class="progress-label">
+              <span>Overall Progress</span>
+              <span id="progressLabel">0 / 0 completed</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+          </div>
+
+          <!-- Plans Container -->
+          <div class="plans-container" id="plansContainer">
+            <div class="empty-state" id="emptyState">
+              <div class="empty-icon">📖</div>
+              <h3>No study plans yet!</h3>
+              <p>Add your first plan using the form on the left.<br/>Your plans will be auto-saved and persist after refresh.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Weekly Overview -->
+        <div class="card weekly-card">
+          <div class="card-header">
+            <span class="card-icon">📊</span>
+            <h2>Weekly Overview</h2>
+          </div>
+          <div class="weekly-chart" id="weeklyChart"></div>
+        </div>
+
+        <!-- Daily Motivational Quote -->
+        <div class="card quote-card">
+          <div class="card-header">
+            <span class="card-icon">💡</span>
+            <h2>Daily Inspiration</h2>
+            <button class="quote-refresh-btn" onclick="newQuote()" title="New quote">🔄</button>
+          </div>
+          <div class="quote-body">
+            <div class="quote-marks">"</div>
+            <p class="quote-text" id="quoteText"></p>
+            <div class="quote-author" id="quoteAuthor"></div>
+          </div>
+          <div class="quote-tags" id="quoteTags"></div>
+        </div>
+
+        <!-- Subject Progress Tracker -->
+        <div class="card subject-card">
+          <div class="card-header">
+            <span class="card-icon">📈</span>
+            <h2>Subject Progress</h2>
+            <button class="btn-add-subject" onclick="addSubjectPrompt()">＋ Add</button>
+          </div>
+          <div class="subject-list" id="subjectList">
+            <div class="subject-empty" id="subjectEmpty">
+              🎒 No subjects yet — click <strong>＋ Add</strong> to track one!
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Sticky Notes -->
+        <div class="card notes-card">
+          <div class="card-header">
+            <span class="card-icon">📝</span>
+            <h2>Quick Notes</h2>
+            <button class="btn-add-subject" onclick="addNote()">＋ Note</button>
+          </div>
+          <div class="sticky-notes-grid" id="stickyNotesGrid">
+            <div class="notes-empty" id="notesEmpty">📌 Click <strong>＋ Note</strong> to jot something down</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Made with ❤️ for <strong>Prashant</strong> · All data auto-saved · <span id="footerDate"></span></p>
+    </footer>
+
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Confetti Canvas -->
+  <canvas id="confetti" style="position:fixed;top:0;left:0;pointer-events:none;z-index:9999;"></canvas>
+
+  <script src="app.js"></script>
+</body>
+</html>
