@@ -4,7 +4,7 @@ A simple and efficient **Study Planner** web application that helps students org
 
 ## 🚀 Live Demo
 
-🔗 Live Website: YOUR_LIVE_LINK
+🔗 Live Website:https://prashant-prashant.github.io/study-planner/
 
 ## 📌 Features
 
